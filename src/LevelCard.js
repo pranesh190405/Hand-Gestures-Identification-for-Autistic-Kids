@@ -20,6 +20,18 @@ const LevelCard = ({ level }) => {
         <h3 style={{ margin: '0 0 5px 0', color: '#2d3436' }}>{level.title}</h3>
         <p style={{ margin: 0, fontSize: '0.9rem', color: '#636e72' }}>
           Target: <strong style={{ color: '#6c5ce7' }}>{level.target}</strong>
+          {level.inputMode && (
+            <span style={{
+              marginLeft: '10px',
+              fontSize: '0.8rem',
+              background: '#ffeaa7',
+              padding: '2px 6px',
+              borderRadius: '6px',
+              color: '#d63031'
+            }}>
+              {level.inputMode === 'camera' ? '📷 Hand' : level.inputMode === 'keyboard' ? '⌨️ Type' : '🎙️ Voice'}
+            </span>
+          )}
         </p>
         <div style={{
           marginTop: '5px',

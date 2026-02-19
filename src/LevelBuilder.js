@@ -5,10 +5,12 @@ import LevelCard from './LevelCard';
 class LevelBuilder extends Component {
 
   state = {
+    levelType: 'gesture', // 'gesture' or 'math'
     title: '',
     icon: '⭐',
-    target: 'High Five',
+    target: '', // Can be string (gesture) or number/string (math answer)
     hint: '',
+    inputMode: 'camera', // 'camera', 'keyboard', 'voice'
     createdLevels: []
   };
 
@@ -25,14 +27,15 @@ class LevelBuilder extends Component {
 
     const newLevel = {
       id: Date.now(),
+      type: this.state.levelType,
       title: this.state.title,
       icon: this.state.icon,
-      target: this.state.target,
-      hint: this.state.hint
+      target: this.state.levelType === 'math' ? this.state.target : this.state.target,
+      hint: this.state.hint,
+      inputMode: this.state.inputMode
     };
 
-
-    this.props.onAddLevel({ ...newLevel, type: 'gesture' });
+    this.props.onAddLevel(newLevel);
 
 
     this.setState((prevState) => ({
@@ -55,13 +58,20 @@ class LevelBuilder extends Component {
 
           <form onSubmit={this.handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
+            <label style={{ alignSelf: 'flex-start', marginLeft: '15%', fontWeight: 'bold', color: '#636e72', marginBottom: '5px' }}>Level Type</label>
+            <select name="levelType" value={this.state.levelType} onChange={this.handleChange} style={{ width: '80%', marginBottom: '10px' }}>
+              <option value="gesture">Gesture Challenge</option>
+              <option value="math">Math Challenge</option>
+              <option value="mcq">Multiple Choice (MCQ)</option>
+            </select>
+
             <label style={{ alignSelf: 'flex-start', marginLeft: '15%', fontWeight: 'bold', color: '#636e72', marginBottom: '5px' }}>Title</label>
             <input
               type="text"
               name="title"
               value={this.state.title}
               onChange={this.handleChange}
-              placeholder="e.g. Super Wave"
+              placeholder="e.g. What is 2 + 2?"
               required
               style={{ width: '70%', marginBottom: '10px' }}
             />
@@ -69,22 +79,77 @@ class LevelBuilder extends Component {
             <label style={{ alignSelf: 'flex-start', marginLeft: '15%', fontWeight: 'bold', color: '#636e72', marginBottom: '5px' }}>Icon</label>
             <select name="icon" value={this.state.icon} onChange={this.handleChange} style={{ width: '80%', marginBottom: '10px' }}>
               <option value="⭐">⭐ Star</option>
-              <option value="👋">👋 Wave</option>
-              <option value="🦁">🦁 Lion</option>
+              <option value="🎯">🎯 Target</option>
+              <option value="🧩">🧩 Puzzle</option>
+              <option value="🎨">🎨 Art</option>
+              <option value="🌈">🌈 Rainbow</option>
+              <option value="🎪">🎪 Circus</option>
               <option value="🚀">🚀 Rocket</option>
               <option value="💖">💖 Heart</option>
-              <option value="🏠">🏠 House</option>
             </select>
 
-            <label style={{ alignSelf: 'flex-start', marginLeft: '15%', fontWeight: 'bold', color: '#636e72', marginBottom: '5px' }}>Gesture</label>
-            <select name="target" value={this.state.target} onChange={this.handleChange} style={{ width: '80%', marginBottom: '10px' }}>
-              <option value="High Five">High Five ✋</option>
-              <option value="Peace">Peace ✌️</option>
-              <option value="Rock">Rock ✊</option>
-              <option value="Thumbs Up">Thumbs Up 👍</option>
-              <option value="Okay">Okay 👌</option>
-              <option value="Fist Bump">Fist Bump 👊</option>
-            </select>
+            {this.state.levelType === 'gesture' ? (
+              <>
+                <label style={{ alignSelf: 'flex-start', marginLeft: '15%', fontWeight: 'bold', color: '#636e72', marginBottom: '5px' }}>Gesture</label>
+                <select name="target" value={this.state.target} onChange={this.handleChange} style={{ width: '80%', marginBottom: '10px' }}>
+                  <option value="High Five">High Five ✋</option>
+                  <option value="Peace">Peace ✌️</option>
+                  <option value="Rock">Rock ✊</option>
+                  <option value="Thumbs Up">Thumbs Up 👍</option>
+                  <option value="Okay">Okay 👌</option>
+                  <option value="Fist Bump">Fist Bump 👊</option>
+                </select>
+              </>
+            ) : this.state.levelType === 'mcq' ? (
+              <>
+                <label style={{ alignSelf: 'flex-start', marginLeft: '15%', fontWeight: 'bold', color: '#636e72', marginBottom: '5px' }}>Question</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={this.state.title}
+                  onChange={this.handleChange}
+                  placeholder="e.g. What is 3 + 2?"
+                  style={{ width: '70%', marginBottom: '10px' }}
+                />
+
+                <label style={{ alignSelf: 'flex-start', marginLeft: '15%', fontWeight: 'bold', color: '#636e72', marginBottom: '5px' }}>Correct Answer</label>
+                <input
+                  type="text"
+                  name="target"
+                  value={this.state.target}
+                  onChange={this.handleChange}
+                  placeholder="e.g. 5"
+                  style={{ width: '70%', marginBottom: '10px' }}
+                />
+
+                <label style={{ alignSelf: 'flex-start', marginLeft: '15%', fontWeight: 'bold', color: '#636e72', marginBottom: '5px' }}>Options (comma-separated)</label>
+                <input
+                  type="text"
+                  name="options"
+                  placeholder="e.g. 3, 4, 5, 6"
+                  style={{ width: '70%', marginBottom: '10px' }}
+                />
+              </>
+            ) : (
+              <>
+                <label style={{ alignSelf: 'flex-start', marginLeft: '15%', fontWeight: 'bold', color: '#636e72', marginBottom: '5px' }}>Target Answer</label>
+                <input
+                  type="text"
+                  name="target"
+                  value={this.state.target}
+                  onChange={this.handleChange}
+                  placeholder="e.g. 5"
+                  style={{ width: '70%', marginBottom: '10px' }}
+                />
+
+                <label style={{ alignSelf: 'flex-start', marginLeft: '15%', fontWeight: 'bold', color: '#636e72', marginBottom: '5px' }}>Input Mode</label>
+                <select name="inputMode" value={this.state.inputMode} onChange={this.handleChange} style={{ width: '80%', marginBottom: '10px' }}>
+                  <option value="camera">Camera (Hand)</option>
+                  <option value="keyboard">Keyboard (Type)</option>
+                  <option value="voice">Voice (Speak)</option>
+                </select>
+              </>
+            )}
 
             <label style={{ alignSelf: 'flex-start', marginLeft: '15%', fontWeight: 'bold', color: '#636e72', marginBottom: '5px' }}>Hint</label>
             <input

@@ -3,41 +3,52 @@ import './App.css';
 import LevelBuilder from './LevelBuilder';
 
 const INITIAL_LEVELS = [
-  { id: 1, type: 'gesture', icon: '✋', title: 'High Five', target: 'high_five', hint: 'All fingers OPEN.' },
-  { id: 2, type: 'gesture', icon: '✌️', title: 'Peace', target: 'peace', hint: 'Index & Middle UP.' },
-  { id: 3, type: 'gesture', icon: '☝️', title: 'One', target: 'one', hint: 'Index UP.' },
-  { id: 4, type: 'gesture', icon: '✊', title: 'Rock', target: 'rock', hint: 'Close all fingers.' },
-  { id: 5, type: 'gesture', icon: '👍', title: 'Thumbs Up', target: 'thumbs_up', hint: 'Thumb UP.' },
-  { id: 6, type: 'gesture', icon: '👌', title: 'Okay', target: 'ok', hint: 'Index touches Thumb.' },
-  { id: 7, type: 'gesture', icon: '🕷️', title: 'Spidey', target: 'spider', hint: 'Index & Pinky UP.' },
-  { id: 8, type: 'gesture', icon: '🤙', title: 'Call Me', target: 'call_me', hint: 'Thumb & Pinky UP.' },
-  { id: 9, type: 'gesture', icon: '📐', title: 'L-Shape', target: 'l_shape', hint: 'Thumb & Index OPEN.' },
-  { id: 10, type: 'gesture', icon: '👊', title: 'Fist Bump', target: 'fist', hint: 'Close fist.' },
-  { id: 11, type: 'math', icon: '3️⃣', title: 'Count to 3', target: 3, hint: 'Show exactly 3 fingers.' },
-  { id: 12, type: 'math', icon: '4️⃣', title: 'Count to 4', target: 4, hint: 'Show 4 fingers.' },
-  { id: 13, type: 'math', icon: '🔟', title: 'Double Hand', target: 10, hint: 'Show all 10 fingers (Two hands).' },
-  { id: 14, type: 'math', icon: '➕', title: '2 + 3 = ?', target: 5, hint: 'Answer is 5.' },
-  { id: 15, type: 'math', icon: '➕', title: '1 + 1 = ?', target: 2, hint: 'Answer is 2.' },
-  { id: 16, type: 'math', icon: '➖', title: '5 - 4 = ?', target: 1, hint: 'Answer is 1.' },
-  { id: 17, type: 'math', icon: '0️⃣', title: 'Zero', target: 0, hint: 'Show zero fingers (Fist).' },
-  { id: 18, type: 'math', icon: '✖️', title: '2 x 3 = ?', target: 6, hint: 'Answer is 6.' },
-  { id: 19, type: 'math', icon: '➕', title: '4 + 4 = ?', target: 8, hint: 'Answer is 8.' },
-  { id: 20, type: 'math', icon: '7️⃣', title: 'Lucky 7', target: 7, hint: 'Show 7 fingers.' },
-  { id: 21, type: 'gesture', icon: '🎸', title: 'Rock On', target: 'spider', hint: 'Spidey/Rock sign!' },
-  { id: 22, type: 'math', icon: '🐙', title: 'Octopus Legs', target: 8, hint: '8 legs.' },
-  { id: 23, type: 'gesture', icon: '📞', title: 'Phone', target: 'call_me', hint: 'Call Me gesture.' },
-  { id: 24, type: 'math', icon: '🌈', title: 'Rainbow', target: 7, hint: '7 Colors.' },
-  { id: 25, type: 'gesture', icon: '✅', title: 'Good Job', target: 'thumbs_up', hint: 'Thumbs Up.' },
-  { id: 26, type: 'math', icon: '🗓️', title: 'Weeks', target: 4, hint: '4 weeks.' },
-  { id: 27, type: 'gesture', icon: '🕊️', title: 'Peace Out', target: 'peace', hint: 'Peace sign.' },
-  { id: 28, type: 'math', icon: '🖐️', title: 'One Hand', target: 5, hint: '5 fingers.' },
-  { id: 29, type: 'gesture', icon: '🛑', title: 'Stop', target: 'high_five', hint: 'Stop sign (Palm).' },
-  { id: 30, type: 'math', icon: '🏆', title: 'The Final Test : How many Fingers do you have ? ', target: 10, hint: '10 fingers to win!' }
+  // Levels 1-5: Counting (Gestures)
+  { id: 1, type: 'math', icon: '☝️', title: 'Count to 1', target: 1, hint: 'Show 1 finger.', inputMode: 'camera' },
+  { id: 2, type: 'math', icon: '✌️', title: 'Count to 2', target: 2, hint: 'Show 2 fingers.', inputMode: 'camera' },
+  { id: 3, type: 'math', icon: '3️⃣', title: 'Count to 3', target: 3, hint: 'Show 3 fingers.', inputMode: 'camera' },
+  { id: 4, type: 'math', icon: '4️⃣', title: 'Count to 4', target: 4, hint: 'Show 4 fingers.', inputMode: 'camera' },
+  { id: 5, type: 'math', icon: '🖐️', title: 'Count to 5', target: 5, hint: 'Show 5 fingers.', inputMode: 'camera' },
+
+  // Levels 6-10: Simple Addition (Gestures)
+  { id: 6, type: 'math', icon: '🍎', title: '1 + 1 = ?', target: 2, hint: 'Show 2 fingers.', inputMode: 'camera', visual: { type: 'apple', count1: 1, count2: 1, op: '+' } },
+  { id: 7, type: 'math', icon: '🍌', title: '2 + 1 = ?', target: 3, hint: 'Show 3 fingers.', inputMode: 'camera', visual: { type: 'banana', count1: 2, count2: 1, op: '+' } },
+  { id: 8, type: 'math', icon: '🍇', title: '2 + 2 = ?', target: 4, hint: 'Show 4 fingers.', inputMode: 'camera', visual: { type: 'grape', count1: 2, count2: 2, op: '+' } },
+  { id: 9, type: 'math', icon: '🍊', title: '3 + 2 = ?', target: 5, hint: 'Show 5 fingers.', inputMode: 'camera', visual: { type: 'orange', count1: 3, count2: 2, op: '+' } },
+  { id: 10, type: 'math', icon: '🔟', title: '5 + 5 = ?', target: 10, hint: 'Show 10 fingers.', inputMode: 'camera', visual: { type: 'star', count1: 5, count2: 5, op: '+' } },
+
+  // Levels 11-15: Multiple Choice Questions
+  { id: 11, type: 'mcq', icon: '🎯', title: 'What is 3 + 2?', target: '5', hint: 'Pick the right answer!', inputMode: 'mcq', options: ['3', '4', '5', '6'] },
+  { id: 12, type: 'mcq', icon: '🧩', title: 'Which number comes after 7?', target: '8', hint: 'Think about counting!', inputMode: 'mcq', options: ['6', '7', '8', '9'] },
+  { id: 13, type: 'mcq', icon: '🎨', title: 'What is 10 - 3?', target: '7', hint: 'Count backwards!', inputMode: 'mcq', options: ['5', '6', '7', '8'] },
+  { id: 14, type: 'mcq', icon: '🌈', title: 'Which is the biggest number?', target: '9', hint: 'Find the largest!', inputMode: 'mcq', options: ['3', '5', '7', '9'] },
+  { id: 15, type: 'mcq', icon: '🎪', title: 'How many sides does a triangle have?', target: '3', hint: 'Think of a triangle!', inputMode: 'mcq', options: ['2', '3', '4', '5'] },
+
+  // Levels 16-20: Typing Answers
+  { id: 16, type: 'math', icon: '⌨️', title: 'Type: 5 + 3', target: 8, hint: 'Type 8', inputMode: 'keyboard', visual: { type: 'car', count1: 5, count2: 3, op: '+' } },
+  { id: 17, type: 'math', icon: '⌨️', title: 'Type: 6 - 2', target: 4, hint: 'Type 4', inputMode: 'keyboard', visual: { type: 'ball', count1: 6, count2: 2, op: '-' } },
+  { id: 18, type: 'math', icon: '⌨️', title: 'Type: 10 - 5', target: 5, hint: 'Type 5', inputMode: 'keyboard', visual: { type: 'cookie', count1: 10, count2: 5, op: '-' } },
+  { id: 19, type: 'math', icon: '⌨️', title: 'Type: 7 + 0', target: 7, hint: 'Type 7', inputMode: 'keyboard', visual: { type: 'cat', count1: 7, count2: 0, op: '+' } },
+  { id: 20, type: 'math', icon: '⌨️', title: 'Type: 9 - 9', target: 0, hint: 'Type 0', inputMode: 'keyboard', visual: { type: 'dog', count1: 9, count2: 9, op: '-' } },
+
+  // Level 21-25: Voice Answers
+  { id: 21, type: 'math', icon: '🎙️', title: 'Say: 1 + 1', target: 2, hint: 'Say "Two"', inputMode: 'voice', visual: { type: 'bird', count1: 1, count2: 1, op: '+' } },
+  { id: 22, type: 'math', icon: '🎙️', title: 'Say: 2 + 2', target: 4, hint: 'Say "Four"', inputMode: 'voice', visual: { type: 'fish', count1: 2, count2: 2, op: '+' } },
+  { id: 23, type: 'math', icon: '🎙️', title: 'Say: 5 - 2', target: 3, hint: 'Say "Three"', inputMode: 'voice', visual: { type: 'frog', count1: 5, count2: 2, op: '-' } },
+  { id: 24, type: 'math', icon: '🎙️', title: 'Say: 3 + 3', target: 6, hint: 'Say "Six"', inputMode: 'voice', visual: { type: 'sun', count1: 3, count2: 3, op: '+' } },
+  { id: 25, type: 'math', icon: '🎙️', title: 'Say: 10 - 1', target: 9, hint: 'Say "Nine"', inputMode: 'voice', visual: { type: 'moon', count1: 10, count2: 1, op: '-' } },
+
+  // Level 26-30: Multiplication with Visuals
+  { id: 26, type: 'math', icon: '✖️', title: '2 x 2', target: 4, hint: '2 groups of 2', inputMode: 'keyboard', visual: { type: 'flower', count1: 2, count2: 2, op: 'x' } },
+  { id: 27, type: 'math', icon: '✖️', title: '3 x 2', target: 6, hint: '3 groups of 2', inputMode: 'keyboard', visual: { type: 'star', count1: 3, count2: 2, op: 'x' } },
+  { id: 28, type: 'math', icon: '✖️', title: '4 x 1', target: 4, hint: '4 groups of 1', inputMode: 'keyboard', visual: { type: 'apple', count1: 4, count2: 1, op: 'x' } },
+  { id: 29, type: 'math', icon: '✖️', title: '2 x 3', target: 6, hint: '2 groups of 3', inputMode: 'keyboard', visual: { type: 'heart', count1: 2, count2: 3, op: 'x' } },
+  { id: 30, type: 'math', icon: '✖️', title: '5 x 2', target: 10, hint: '5 groups of 2', inputMode: 'keyboard', visual: { type: 'diamond', count1: 5, count2: 2, op: 'x' } }
 ];
 
 function App() {
   const [levels, setLevels] = useState(() => {
-    const savedLevels = localStorage.getItem('custom_levels');
+    const savedLevels = localStorage.getItem('math_lab_mcq');
     return savedLevels ? JSON.parse(savedLevels) : INITIAL_LEVELS;
   });
 
@@ -49,6 +60,9 @@ function App() {
   const [hintVisible, setHintVisible] = useState(false);
   const [feedback, setFeedback] = useState("Show me your hands!");
   const [feedbackType, setFeedbackType] = useState("neutral");
+  const [inputValue, setInputValue] = useState("");
+  const [isListening, setIsListening] = useState(false);
+
 
   const [showVictory, setShowVictory] = useState(false);
   const [levelStats, setLevelStats] = useState({ stars: 0, time: 0 });
@@ -68,7 +82,7 @@ function App() {
 
   useEffect(() => {
     if (levels.length > INITIAL_LEVELS.length) {
-      localStorage.setItem('custom_levels', JSON.stringify(levels));
+      localStorage.setItem('math_lab_mcq', JSON.stringify(levels));
     }
   }, [levels]);
 
@@ -94,13 +108,86 @@ function App() {
       gameState.current.isDetecting = true;
       gameState.current.levelStartTime = Date.now();
       gameState.current.holdStartTime = 0;
+      const lvl = levels[currentLevel];
       setHintVisible(false);
-      setFeedback("Show me your hands!");
+
+      if (lvl.inputMode === 'keyboard') {
+        setFeedback("Type your answer...");
+      } else if (lvl.inputMode === 'voice') {
+        setFeedback("Tap Mic to Speak...");
+      } else {
+        setFeedback("Show me your hands!");
+      }
+
       setFeedbackType("neutral");
+      setInputValue("");
+      setIsListening(false);
     }
-  }, [currentLevel, screen]);
+  }, [currentLevel, screen, levels]);
+
+  const startListening = () => {
+    if (!('webkitSpeechRecognition' in window)) {
+      alert("Speech Recognition not supported in this browser. Try Chrome.");
+      return;
+    }
+    const recognition = new window.webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      setFeedback("Listening...", "neutral");
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInputValue(transcript);
+      checkInput(transcript);
+      setIsListening(false);
+    };
+
+    recognition.onerror = (event) => {
+      setFeedback("Error listening. Try again.", "neutral");
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
+
+  const checkInput = (val) => {
+    const lvl = levels[levelRef.current];
+    const target = lvl.target.toString().toLowerCase();
+    const input = val.toString().toLowerCase();
+
+    // Number to Word mapping for voice
+    const numWords = {
+      'one': '1', 'two': '2', 'three': '3', 'four': '4', 'five': '5',
+      'six': '6', 'seven': '7', 'eight': '8', 'nine': '9', 'ten': '10', 'zero': '0'
+    };
+
+    let normalizedInput = input;
+    if (lvl.inputMode === 'voice' && numWords[input]) {
+      normalizedInput = numWords[input];
+    }
+
+    if (normalizedInput === target || input.includes(target)) { // loose matching for voice
+      handleWin();
+    } else {
+      updateFeedback("Try again!", "neutral");
+      setTimeout(() => setFeedback(""), 1000);
+    }
+  };
   useEffect(() => {
     if (screen !== 'game') return;
+    // For non-camera levels, we don't need to initialize the camera
+    const lvl = levels[currentLevel];
+    if (lvl && lvl.inputMode !== 'camera' && lvl.type !== 'gesture') return;
+
     if (!videoRef.current || !canvasRef.current) return;
     if (!window.Hands || !window.Camera) return;
 
@@ -109,7 +196,13 @@ function App() {
     const ctx = canvas.getContext('2d');
 
     const hands = new window.Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
-    hands.setOptions({ maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+    // Optimized settings for better performance
+    hands.setOptions({
+      maxNumHands: 2,
+      modelComplexity: 0, // Faster model (0 = lite, 1 = full)
+      minDetectionConfidence: 0.6,
+      minTrackingConfidence: 0.5
+    });
 
     hands.onResults((results) => {
       ctx.save();
@@ -135,14 +228,19 @@ function App() {
 
     const camera = new window.Camera(video, {
       onFrame: async () => { await hands.send({ image: video }); },
-      width: 640, height: 480
+      width: 480, height: 360 // Reduced resolution for better performance
     });
 
     camera.start();
     cameraRef.current = camera;
 
-    return () => { if (cameraRef.current) cameraRef.current.stop(); };
-  }, [screen]);
+    return () => {
+      if (cameraRef.current) {
+        cameraRef.current.stop();
+        cameraRef.current = null;
+      }
+    };
+  }, [screen, currentLevel, levels]);
   const updateFeedback = (msg, type) => {
     setFeedback(msg);
     setFeedbackType(type);
@@ -171,28 +269,6 @@ function App() {
       }
       if (total === lvl.target) isCorrect = true;
       else updateFeedback(`I count ${total}...`, "neutral");
-
-    } else {
-      const lm = allHands[0];
-      const thumb = isThumbOpen(lm);
-      const index = isFingerOpen(lm, 8);
-      const middle = isFingerOpen(lm, 12);
-      const ring = isFingerOpen(lm, 16);
-      const pinky = isFingerOpen(lm, 20);
-
-      switch (lvl.target) {
-        case 'high_five': isCorrect = thumb && index && middle && ring && pinky; break;
-        case 'peace': isCorrect = index && middle && !ring && !pinky; break;
-        case 'rock': isCorrect = !index && !middle && !ring && !pinky; break;
-        case 'one': isCorrect = index && !middle && !ring && !pinky; break;
-        case 'thumbs_up': isCorrect = thumb && !index && !middle && !ring && !pinky; break;
-        case 'ok': isCorrect = index === false && middle && ring && pinky; break;
-        case 'spider': isCorrect = index && pinky && !middle && !ring; break;
-        case 'call_me': isCorrect = thumb && pinky && !index && !middle && !ring; break;
-        case 'l_shape': isCorrect = thumb && index && !middle && !ring && !pinky; break;
-        case 'fist': isCorrect = !index && !middle && !ring && !pinky; break;
-        default: break;
-      }
     }
 
     if (isCorrect) {
@@ -203,7 +279,6 @@ function App() {
       if (elapsed > gameState.current.holdDuration) handleWin();
     } else {
       gameState.current.holdStartTime = 0;
-      if (lvl.type !== 'math') updateFeedback("Try again...", "neutral");
     }
   };
 
@@ -246,9 +321,51 @@ function App() {
     setScreen('game');
   };
 
+  const handleReset = () => {
+    localStorage.removeItem('math_lab_mcq');
+    localStorage.removeItem('custom_levels');
+    window.location.reload();
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('gesture_save');
     window.location.reload();
+  };
+
+  const renderVisuals = (level) => {
+    if (!level.visual) return null;
+    const { type, count1, count2, op } = level.visual;
+    const icons = {
+      apple: '🍎', banana: '🍌', grape: '🍇', orange: '🍊', star: '⭐',
+      car: '🚗', ball: '⚽', cookie: '🍪', cat: '🐱', dog: '🐶',
+      bird: '🐦', fish: '🐟', frog: '🐸', sun: '☀️', moon: '🌙',
+      flower: '🌸', heart: '❤️', diamond: '💎'
+    };
+    const icon = icons[type] || '❓';
+
+    if (op === 'x') {
+      // Multiplication visualization: Groups
+      return (
+        <div className="visual-container">
+          {Array.from({ length: count1 }).map((_, i) => (
+            <div key={i} className="visual-group">
+              {Array.from({ length: count2 }).map((_, j) => (
+                <span key={j} className="visual-icon">{icon}</span>
+              ))}
+            </div>
+          ))}
+        </div>
+      );
+    } else {
+      // Addition/Subtraction
+      return (
+        <div className="visual-container">
+          {Array.from({ length: count1 }).map((_, i) => <span key={`a-${i}`} className="visual-icon">{icon}</span>)}
+          <span className="visual-op">{op}</span>
+          {Array.from({ length: count2 }).map((_, i) => <span key={`b-${i}`} className="visual-icon">{icon}</span>)}
+        </div>
+      );
+    }
   };
   return (
     <div className="app-container">
@@ -259,8 +376,8 @@ function App() {
       {screen === 'login' && (
         <div className="glass-panel">
           <div className="avatar">🧙‍♂️</div>
-          <h1>Gesture Quest</h1>
-          <p>Master Hand Magic</p>
+          <h1>Math Quest</h1>
+          <p>Master Math Skills</p>
           <input type="text" placeholder="Enter Hero Name" onChange={(e) => setUser(e.target.value)} />
           <button className="btn-main" onClick={startGame}>Start Adventure</button>
           <div style={{ marginTop: '20px' }}>
@@ -288,6 +405,13 @@ function App() {
                 style={{ fontSize: '0.8rem', padding: '5px 10px' }}
               >
                 Logout
+              </button>
+              <button
+                className="btn-small"
+                onClick={handleReset}
+                style={{ fontSize: '0.8rem', padding: '5px 10px', background: '#d63031' }}
+              >
+                Reset Progress
               </button>
             </div>
           </div>
@@ -320,10 +444,77 @@ function App() {
               {hintVisible && <p id="hint-text">{levels[currentLevel].hint}</p>}
             </div>
             <div className="vision-card">
-              <div className="cam-wrapper">
-                <video ref={videoRef} className="input_video" style={{ display: 'none' }}></video>
-                <canvas ref={canvasRef} width="640" height="480"></canvas>
-              </div>
+              {levels[currentLevel].visual && renderVisuals(levels[currentLevel])}
+
+              {(levels[currentLevel].inputMode === 'camera' || levels[currentLevel].type === 'gesture') && (
+                <div className="cam-wrapper">
+                  <video ref={videoRef} className="input_video" style={{ display: 'none' }}></video>
+                  <canvas ref={canvasRef} width="480" height="360"></canvas>
+                </div>
+              )}
+
+              {levels[currentLevel].inputMode === 'keyboard' && (
+                <div className="input-area">
+                  <input
+                    type="number"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    placeholder="?"
+                    style={{ fontSize: '2rem', padding: '10px', width: '100px', textAlign: 'center' }}
+                  />
+                  <button className="btn-main" onClick={() => checkInput(inputValue)}>Check</button>
+                </div>
+              )}
+
+              {levels[currentLevel].inputMode === 'voice' && (
+                <div className="input-area">
+                  <button
+                    className={`btn-voice ${isListening ? 'listening' : ''}`}
+                    onClick={startListening}
+                    style={{ fontSize: '3rem', padding: '20px', borderRadius: '50%', background: isListening ? '#ff7675' : '#74b9ff' }}
+                  >
+                    🎙️
+                  </button>
+                  <p style={{ fontSize: '1.2rem' }}>{inputValue || "Tap to Speak"}</p>
+                </div>
+              )}
+
+              {levels[currentLevel].inputMode === 'mcq' && (
+                <div className="mcq-container" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', padding: '20px', width: '100%', maxWidth: '500px' }}>
+                  {levels[currentLevel].options.map((option, idx) => (
+                    <button
+                      key={idx}
+                      className="mcq-option"
+                      onClick={() => checkInput(option)}
+                      style={{
+                        fontSize: '2.5rem',
+                        padding: '30px',
+                        borderRadius: '25px',
+                        border: 'none',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s',
+                        background: ['#ff7675', '#74b9ff', '#55efc4', '#fdcb6e'][idx],
+                        color: 'white',
+                        boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
+                        fontFamily: 'Fredoka One, cursive'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.transform = 'translateY(-5px)';
+                        e.target.style.boxShadow = '0 12px 30px rgba(0,0,0,0.3)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = '0 8px 20px rgba(0,0,0,0.2)';
+                      }}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+
               <div id="feedback-bar" style={{ background: feedbackType === 'success' ? '#55efc4' : 'white' }}>
                 {feedback}
               </div>
