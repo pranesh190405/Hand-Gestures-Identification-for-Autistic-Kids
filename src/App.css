@@ -192,21 +192,20 @@ select {
 }
 
 .btn-main {
-  background: var(--primary);
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
   color: white;
   border: none;
-  padding: 12px 40px;
-  font-size: 1.2rem;
+  padding: 15px 30px;
+  font-size: 1.5rem;
   border-radius: 50px;
   cursor: pointer;
-  box-shadow: 0 10px 20px rgba(255, 107, 53, 0.3);
   transition: transform 0.2s, box-shadow 0.2s;
-  letter-spacing: 1px;
+  box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
 }
 
 .btn-main:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 25px rgba(255, 107, 53, 0.4);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(108, 92, 231, 0.6);
 }
 
 .btn-small {
@@ -214,10 +213,16 @@ select {
   color: white;
   border: none;
   padding: 8px 15px;
-  border-radius: 15px;
+  border-radius: 20px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  transition: transform 0.2s;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.btn-small:hover {
+  transform: scale(1.1);
+  background: #d63031;
 }
 
 

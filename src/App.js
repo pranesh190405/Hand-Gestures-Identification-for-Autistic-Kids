@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import LevelBuilder from './LevelBuilder';
+import html2canvas from 'html2canvas';
+import confetti from 'canvas-confetti';
 
 const INITIAL_LEVELS = [
   // Levels 1-5: Counting (Gestures)
@@ -62,15 +64,16 @@ function App() {
   const [feedbackType, setFeedbackType] = useState("neutral");
   const [inputValue, setInputValue] = useState("");
   const [isListening, setIsListening] = useState(false);
-
-
+  const [showCalmOverlay, setShowCalmOverlay] = useState(false);
   const [showVictory, setShowVictory] = useState(false);
   const [levelStats, setLevelStats] = useState({ stars: 0, time: 0 });
 
+  const appRef = useRef(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const cameraRef = useRef(null);
   const levelRef = useRef(0);
+  const clickTracker = useRef({ count: 0, lastTime: 0 });
 
   const gameState = useRef({
     isDetecting: false,
@@ -79,92 +82,65 @@ function App() {
     holdDuration: 1500
   });
 
+  // --- Helper Functions (Defined before Effects) ---
 
-  useEffect(() => {
-    if (levels.length > INITIAL_LEVELS.length) {
-      localStorage.setItem('math_lab_mcq', JSON.stringify(levels));
+  const speak = (text) => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(utterance);
     }
-  }, [levels]);
-
-  const addLevel = (newLevel) => {
-    setLevels(prev => [...prev, newLevel]);
   };
 
-  useEffect(() => {
-    const saved = localStorage.getItem('gesture_save');
-    if (saved) {
-      const data = JSON.parse(saved);
-      setUser(data.user || 'Hero');
-      setScore(data.score || 0);
-      setUnlocked(data.unlocked || 0);
-      setScreen('map');
-    }
+  const updateFeedback = React.useCallback((msg, type) => {
+    setFeedback(msg);
+    setFeedbackType(type);
   }, []);
-  useEffect(() => {
-    levelRef.current = currentLevel;
-  }, [currentLevel]);
-  useEffect(() => {
-    if (screen === 'game') {
-      gameState.current.isDetecting = true;
-      gameState.current.levelStartTime = Date.now();
-      gameState.current.holdStartTime = 0;
-      const lvl = levels[currentLevel];
-      setHintVisible(false);
 
-      if (lvl.inputMode === 'keyboard') {
-        setFeedback("Type your answer...");
-      } else if (lvl.inputMode === 'voice') {
-        setFeedback("Tap Mic to Speak...");
-      } else {
-        setFeedback("Show me your hands!");
-      }
-
-      setFeedbackType("neutral");
-      setInputValue("");
-      setIsListening(false);
+  const handleNextLevelClick = React.useCallback(() => {
+    setShowVictory(false);
+    if (currentLevel < levels.length - 1) {
+      setCurrentLevel(currentLevel + 1);
+    } else {
+      setScreen('final');
     }
-  }, [currentLevel, screen, levels]);
+  }, [currentLevel, levels]);
 
-  const startListening = () => {
-    if (!('webkitSpeechRecognition' in window)) {
-      alert("Speech Recognition not supported in this browser. Try Chrome.");
-      return;
-    }
-    const recognition = new window.webkitSpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = 'en-US';
+  const handleWin = React.useCallback(() => {
+    gameState.current.isDetecting = false;
 
-    recognition.onstart = () => {
-      setIsListening(true);
-      setFeedback("Listening...", "neutral");
-    };
+    const timeTakenSec = (Date.now() - gameState.current.levelStartTime) / 1000;
+    let stars = 1;
+    if (timeTakenSec < 5) stars = 3;
+    else if (timeTakenSec < 10) stars = 2;
 
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setInputValue(transcript);
-      checkInput(transcript);
-      setIsListening(false);
-    };
+    const newScore = score + (stars * 10);
+    setScore(newScore);
+    if (currentLevel === unlocked) setUnlocked(unlocked + 1);
 
-    recognition.onerror = (event) => {
-      setFeedback("Error listening. Try again.", "neutral");
-      setIsListening(false);
-    };
+    localStorage.setItem('gesture_save', JSON.stringify({
+      user, score: newScore, unlocked: Math.max(unlocked, currentLevel + 1)
+    }));
 
-    recognition.onend = () => {
-      setIsListening(false);
-    };
+    setLevelStats({ stars, time: Math.floor(timeTakenSec) });
+    setShowVictory(true);
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+  }, [score, currentLevel, unlocked, user]);
 
-    recognition.start();
-  };
-
-  const checkInput = (val) => {
+  const checkInput = React.useCallback((val) => {
     const lvl = levels[levelRef.current];
+    if (!lvl) return;
+
     const target = lvl.target.toString().toLowerCase();
     const input = val.toString().toLowerCase();
 
-    // Number to Word mapping for voice
+    if (lvl.inputMode === 'keyboard' && val !== "") {
+      speak(val);
+    }
+
     const numWords = {
       'one': '1', 'two': '2', 'three': '3', 'four': '4', 'five': '5',
       'six': '6', 'seven': '7', 'eight': '8', 'nine': '9', 'ten': '10', 'zero': '0'
@@ -175,79 +151,18 @@ function App() {
       normalizedInput = numWords[input];
     }
 
-    if (normalizedInput === target || input.includes(target)) { // loose matching for voice
+    if (normalizedInput === target || input.includes(target)) {
       handleWin();
     } else {
       updateFeedback("Try again!", "neutral");
       setTimeout(() => setFeedback(""), 1000);
     }
-  };
-  useEffect(() => {
-    if (screen !== 'game') return;
-    // For non-camera levels, we don't need to initialize the camera
-    const lvl = levels[currentLevel];
-    if (lvl && lvl.inputMode !== 'camera' && lvl.type !== 'gesture') return;
+  }, [levels, handleWin, updateFeedback]);
 
-    if (!videoRef.current || !canvasRef.current) return;
-    if (!window.Hands || !window.Camera) return;
-
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-
-    const hands = new window.Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
-    // Optimized settings for better performance
-    hands.setOptions({
-      maxNumHands: 2,
-      modelComplexity: 0, // Faster model (0 = lite, 1 = full)
-      minDetectionConfidence: 0.6,
-      minTrackingConfidence: 0.5
-    });
-
-    hands.onResults((results) => {
-      ctx.save();
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
-
-      if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-        for (const landmarks of results.multiHandLandmarks) {
-          window.drawConnectors(ctx, landmarks, window.HAND_CONNECTIONS, { color: '#00cec9', lineWidth: 4 });
-          window.drawLandmarks(ctx, landmarks, { color: '#fab1a0', lineWidth: 2 });
-        }
-        if (gameState.current.isDetecting) {
-          checkLogic(results.multiHandLandmarks);
-        }
-      } else {
-        if (gameState.current.isDetecting) {
-          gameState.current.holdStartTime = 0;
-          updateFeedback("Show me your hands!", "neutral");
-        }
-      }
-      ctx.restore();
-    });
-
-    const camera = new window.Camera(video, {
-      onFrame: async () => { await hands.send({ image: video }); },
-      width: 480, height: 360 // Reduced resolution for better performance
-    });
-
-    camera.start();
-    cameraRef.current = camera;
-
-    return () => {
-      if (cameraRef.current) {
-        cameraRef.current.stop();
-        cameraRef.current = null;
-      }
-    };
-  }, [screen, currentLevel, levels]);
-  const updateFeedback = (msg, type) => {
-    setFeedback(msg);
-    setFeedbackType(type);
-  };
-
-  const checkLogic = (allHands) => {
+  const checkLogic = React.useCallback((allHands) => {
     const lvl = levels[levelRef.current];
+    if (!lvl) return;
+
     let isCorrect = false;
     const dist = (p1, p2) => Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
     const isFingerOpen = (lm, tip) => dist(lm[tip], lm[0]) > dist(lm[tip - 2], lm[0]);
@@ -280,35 +195,44 @@ function App() {
     } else {
       gameState.current.holdStartTime = 0;
     }
-  };
+  }, [levels, updateFeedback, handleWin]);
 
-  const handleWin = () => {
-    gameState.current.isDetecting = false;
-
-    const timeTakenSec = (Date.now() - gameState.current.levelStartTime) / 1000;
-    let stars = 1;
-    if (timeTakenSec < 5) stars = 3;
-    else if (timeTakenSec < 10) stars = 2;
-
-    const newScore = score + (stars * 10);
-    setScore(newScore);
-    if (currentLevel === unlocked) setUnlocked(unlocked + 1);
-
-    localStorage.setItem('gesture_save', JSON.stringify({
-      user, score: newScore, unlocked: Math.max(unlocked, currentLevel + 1)
-    }));
-
-    setLevelStats({ stars, time: Math.floor(timeTakenSec) });
-    setShowVictory(true);
-  };
-
-  const handleNextLevelClick = () => {
-    setShowVictory(false);
-    if (currentLevel < levels.length - 1) {
-      setCurrentLevel(currentLevel + 1);
-    } else {
-      setScreen('final');
+  const startListening = () => {
+    if (!('webkitSpeechRecognition' in window)) {
+      alert("Speech Recognition not supported in this browser. Try Chrome.");
+      return;
     }
+    const recognition = new window.webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      setFeedback("Listening...", "neutral");
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInputValue(transcript);
+      checkInput(transcript);
+      setIsListening(false);
+    };
+
+    recognition.onerror = () => {
+      setFeedback("Error listening. Try again.", "neutral");
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
+
+  const addLevel = (newLevel) => {
+    setLevels(prev => [...prev, newLevel]);
   };
 
   const startGame = () => {
@@ -332,6 +256,159 @@ function App() {
     window.location.reload();
   };
 
+  // --- Effects ---
+
+  useEffect(() => {
+    if (levels.length > INITIAL_LEVELS.length) {
+      localStorage.setItem('math_lab_mcq', JSON.stringify(levels));
+    }
+  }, [levels]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('gesture_save');
+    if (saved) {
+      const data = JSON.parse(saved);
+      setUser(data.user || 'Hero');
+      setScore(data.score || 0);
+      setUnlocked(data.unlocked || 0);
+      setScreen('map');
+    }
+  }, []);
+
+  useEffect(() => {
+    levelRef.current = currentLevel;
+  }, [currentLevel]);
+
+  useEffect(() => {
+    if (screen === 'game') {
+      gameState.current.isDetecting = true;
+      gameState.current.levelStartTime = Date.now();
+      gameState.current.holdStartTime = 0;
+      const lvl = levels[currentLevel];
+      setHintVisible(false);
+
+      if (lvl.inputMode === 'keyboard') {
+        setFeedback("Type your answer...");
+      } else if (lvl.inputMode === 'voice') {
+        setFeedback("Tap Mic to Speak...");
+      } else {
+        setFeedback("Show me your hands!");
+      }
+
+      setFeedbackType("neutral");
+      setInputValue("");
+      setIsListening(false);
+    }
+  }, [currentLevel, screen, levels]);
+
+  // Keyboard & Click Listener
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (screen === 'game') {
+        const lvl = levels[currentLevel];
+
+        if (e.key === 'Escape') {
+          setScreen('map');
+          return;
+        }
+
+        if (lvl.inputMode === 'keyboard') {
+          if (e.key === 'Enter') {
+            checkInput(inputValue);
+          } else if (e.key.length === 1) { // Single character
+            speak(e.key);
+          }
+        }
+      } else if (showVictory) {
+        if (e.key === 'Enter' || e.key === 'ArrowRight') {
+          handleNextLevelClick();
+        }
+      }
+    };
+
+    const handleGlobalClick = () => {
+      const now = Date.now();
+      if (now - clickTracker.current.lastTime < 1000) {
+        clickTracker.current.count++;
+      } else {
+        clickTracker.current.count = 1;
+      }
+      clickTracker.current.lastTime = now;
+
+      if (clickTracker.current.count >= 5) {
+        setShowCalmOverlay(true);
+        clickTracker.current.count = 0;
+        speak("It's okay. Take a deep breath.");
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('click', handleGlobalClick);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('click', handleGlobalClick);
+    };
+  }, [screen, currentLevel, inputValue, levels, showVictory, checkInput, handleNextLevelClick]);
+
+  // Camera Logic
+  useEffect(() => {
+    if (screen !== 'game') return;
+    const lvl = levels[currentLevel];
+    if (lvl && lvl.inputMode !== 'camera' && lvl.type !== 'gesture') return;
+
+    if (!videoRef.current || !canvasRef.current || !window.Hands || !window.Camera) return;
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+
+    const hands = new window.Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
+    hands.setOptions({
+      maxNumHands: 2,
+      modelComplexity: 0,
+      minDetectionConfidence: 0.6,
+      minTrackingConfidence: 0.5
+    });
+
+    hands.onResults((results) => {
+      ctx.save();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+
+      if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+        for (const landmarks of results.multiHandLandmarks) {
+          window.drawConnectors(ctx, landmarks, window.HAND_CONNECTIONS, { color: '#00cec9', lineWidth: 4 });
+          window.drawLandmarks(ctx, landmarks, { color: '#fab1a0', lineWidth: 2 });
+        }
+        if (gameState.current.isDetecting) {
+          checkLogic(results.multiHandLandmarks);
+        }
+      } else {
+        if (gameState.current.isDetecting) {
+          gameState.current.holdStartTime = 0;
+          updateFeedback("Show me your hands!", "neutral");
+        }
+      }
+      ctx.restore();
+    });
+
+    const camera = new window.Camera(video, {
+      onFrame: async () => { await hands.send({ image: video }); },
+      width: 480, height: 360
+    });
+
+    camera.start();
+    cameraRef.current = camera;
+
+    return () => {
+      if (cameraRef.current) {
+        cameraRef.current.stop();
+        cameraRef.current = null;
+      }
+    };
+  }, [screen, currentLevel, levels, checkLogic, updateFeedback]); // Added checkLogic, updateFeedback
+
   const renderVisuals = (level) => {
     if (!level.visual) return null;
     const { type, count1, count2, op } = level.visual;
@@ -344,7 +421,6 @@ function App() {
     const icon = icons[type] || '❓';
 
     if (op === 'x') {
-      // Multiplication visualization: Groups
       return (
         <div className="visual-container">
           {Array.from({ length: count1 }).map((_, i) => (
@@ -357,7 +433,6 @@ function App() {
         </div>
       );
     } else {
-      // Addition/Subtraction
       return (
         <div className="visual-container">
           {Array.from({ length: count1 }).map((_, i) => <span key={`a-${i}`} className="visual-icon">{icon}</span>)}
@@ -368,7 +443,7 @@ function App() {
     }
   };
   return (
-    <div className="app-container">
+    <div className="app-container" ref={appRef}>
       <div className="blob b1"></div>
       <div className="blob b2"></div>
       <div className="blob b3"></div>
@@ -433,8 +508,9 @@ function App() {
       {screen === 'game' && (
         <div className="glass-panel">
           <div className="top-hud">
-            <button className="btn-small" onClick={() => setScreen('map')}>❌ Exit</button>
+            <button className="btn-small" onClick={() => setScreen('map')} title="Press Esc">❌ Exit</button>
             <span className="level-badge">{levels[currentLevel].type}</span>
+            <button className="btn-small" onClick={() => captureScreen()} title="Save your progress">📸 Capture</button>
           </div>
           <div className="arena-split">
             <div className="challenge-card">
@@ -543,7 +619,19 @@ function App() {
               {"⭐".repeat(levelStats.stars)}
             </div>
             <p>Time: {levelStats.time}s</p>
-            <button className="btn-main" onClick={handleNextLevelClick}>Next Level ➡</button>
+            <button className="btn-main" onClick={handleNextLevelClick} title="Press Enter">Next Level ➡</button>
+            <button className="btn-small" onClick={() => captureScreen()} style={{ marginTop: '10px' }}>📸 Save Moment</button>
+          </div>
+        </div>
+      )}
+
+      {showCalmOverlay && (
+        <div className="modal" style={{ background: 'rgba(0,0,0,0.8)' }}>
+          <div className="modal-card" style={{ background: '#74b9ff', color: 'white' }}>
+            <h1 style={{ fontSize: '4rem', color: 'white' }}>✌️</h1>
+            <h2>It's Okay!</h2>
+            <p style={{ color: 'white', fontSize: '1.5rem' }}>Take a deep breath...</p>
+            <button className="btn-main" onClick={() => setShowCalmOverlay(false)} style={{ background: 'white', color: '#74b9ff', marginTop: '20px' }}>I'm Ready</button>
           </div>
         </div>
       )}
@@ -551,5 +639,15 @@ function App() {
     </div>
   );
 }
+
+const captureScreen = () => {
+  const element = document.body; // Capture entire body or app container
+  html2canvas(element).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'gesture-quest-moment.png';
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+};
 
 export default App;
